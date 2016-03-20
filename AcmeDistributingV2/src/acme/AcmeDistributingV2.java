@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 
+
 public class AcmeDistributingV2 extends JFrame{
 
     private JPanel panel_checked, panel_unchecked, panel_buttons;
@@ -33,15 +34,17 @@ public class AcmeDistributingV2 extends JFrame{
 
     public AcmeDistributingV2(){
 
-        try{
-            data = new ASCIIDataFile();
-        }catch(NullPointerException e){
-            System.err.println("User choose cancel when read file.");
-            System.exit(-1);
+        while(true){
+            try{
+                data = new ASCIIDataFile();
+                break;
+            }catch(NullPointerException e){
+                int confirm=JOptionPane.showConfirmDialog(null,"Please choose a file to read, or choose Cancel to quit.","Choose a file",JOptionPane.OK_CANCEL_OPTION);
+                if(confirm==2) System.exit(-1);
+            }
         }
 
         makeQueue();
-
         buildForm();
         showDataFromQueue();
         setVisible(true);
@@ -116,7 +119,6 @@ public class AcmeDistributingV2 extends JFrame{
                 itemNum = Order.makeString(data.readString());
                 quantity = Order.makeInteger(data.readString());
                 address = readAddress();
-                System.out.println("add to queue");
                 orderQueue.add(new Order(date,time,orderNum,itemNum,quantity,address));
             }
         }catch(ParseException e){            //when Format is invalid
@@ -130,11 +132,9 @@ public class AcmeDistributingV2 extends JFrame{
         String result="";
         while(true){
             Character c = data.readC();
-            System.out.println("ASCII: "+(int)c);
             if((int)c==10) break;
             if((int)c==92){
                 Character next = data.readC();
-                System.out.println("ASCII: "+(int)next);
                 if((int)next==110) c=(char)10;
             }
             result += c;
@@ -232,12 +232,16 @@ public class AcmeDistributingV2 extends JFrame{
         @Override
         public void actionPerformed(ActionEvent e) {
             addDataToQueue();
-            try{
-                output = new ASCIIOutputFile();
-            }catch(NullPointerException e1){
-                System.err.println("User choose cancel when saving");
-                System.exit(-1);
+            while (true){
+                try{
+                    output = new ASCIIOutputFile();
+                    break;
+                }catch(NullPointerException e1){
+                    int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to close without saving?","Close without saving",JOptionPane.YES_NO_OPTION);
+                    if(confirm!=1) System.exit(-1);
+                }
             }
+
 
             while(!orderQueue.isEmpty()){
                 Order order = orderQueue.poll();
@@ -326,7 +330,6 @@ public class AcmeDistributingV2 extends JFrame{
                 System.err.println("Unknown JTextField");
                 return;
             }
-//            System.out.println("Focused text is: "+text);
             allValid = dateValid && timeValid && orderNumValid && itemNumValid && quantityValid;
             if(!allValid) button_ok.setEnabled(false);
             else button_ok.setEnabled(true);
