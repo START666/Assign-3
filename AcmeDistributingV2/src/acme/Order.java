@@ -11,6 +11,7 @@ import java.util.Date;
  *     1.java.text: From Java Library, used to get Date Format
  *     2.java.util: From Java Library, used to get Date Object
  * Created by Xuhao Chen on 16/2/28.
+ * Edited by Xuhao Chen on 16/3/20.
  */
 
 public class Order {
@@ -63,7 +64,8 @@ public class Order {
     }
 
 
-    public Order(Date date,Date time,String orderNum,String itemNum,Number quantity,String address){
+    public Order(Date date,Date time,String orderNum,
+                 String itemNum,Number quantity,String address){
         this.date = date;
         this.time = time;
         this.orderNum = orderNum;
@@ -72,7 +74,8 @@ public class Order {
         this.address = address;
     }
 
-    public Order(String date, String time, String orderNum, String itemNum, String quantity,String address){
+    public Order(String date, String time, String orderNum,
+                 String itemNum, String quantity,String address){
         try{
             this.date = makeDate(date);
             this.time = makeTime(time);

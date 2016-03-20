@@ -1,6 +1,5 @@
 package acme;
 
-import BasicIO.ASCIIDataFile;
 import BasicIO.ASCIIOutputFile;
 
 import javax.swing.*;
@@ -10,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -18,136 +16,28 @@ import java.util.Queue;
 public class AcmeDistributingV2 extends JFrame{
 
     private JPanel panel_checked, panel_unchecked, panel_buttons;
-    private JLabel label_date, label_time, label_orderNum, label_itemNum, label_quantity, label_address;
-    private JTextField field_date, field_time,field_orderNum, field_itemNum, field_quantity;
+    private JLabel label_date, label_time, label_orderNum,
+            label_itemNum, label_quantity, label_address;
+    private JTextField field_date, field_time,field_orderNum,
+            field_itemNum, field_quantity;
     private JTextArea area_address;
     private JButton button_ok, button_quit;
 
     private boolean allValid = true;
 
-    private ASCIIDataFile data;
     private Queue<Order> orderQueue = new LinkedList<Order>();
 
-    public static void main(String[] args){
-        new AcmeDistributingV2();
-    }
+    public static void main(String[] args){new AcmeDistributingV2();}
 
     public AcmeDistributingV2(){
+        super("Acme Distributing V2");
+        setLayout(new BorderLayout());
 
-        while(true){
-            try{
-                data = new ASCIIDataFile();
-                break;
-            }catch(NullPointerException e){
-                int confirm=JOptionPane.showConfirmDialog(null,"Please choose a file to read, or choose Cancel to quit.","Choose a file",JOptionPane.OK_CANCEL_OPTION);
-                if(confirm==2) System.exit(-1);
-            }
-        }
-
-        makeQueue();
-        buildForm();
-        showDataFromQueue();
-        setVisible(true);
-
-
-    }
-
-    private void addDataToQueue(){
-        String date = field_date.getText();
-        String time = field_time.getText();
-        String orderNum = field_orderNum.getText();
-        String itemNum = field_itemNum.getText();
-        String quantity = field_quantity.getText();
-        String address = area_address.getText();
-        Order tmp;
-        try{
-            tmp = new Order(Order.makeDate(date),Order.makeTime(time), Order.makeString(orderNum),Order.makeString(itemNum),Order.makeInteger(quantity),address);
-        }catch(ParseException e){
-            System.err.println(e.getMessage());
-            return;
-        }
-        orderQueue.offer(tmp);
-
-    }
-
-    private boolean showDataFromQueue(){
-        if(!orderQueue.isEmpty()){
-            Order tmp = orderQueue.poll();
-
-            String date = tmp.getDateString();
-            String time = tmp.getTimeString();
-            String orderNUm = tmp.getOrderNum();
-            String itemNum = tmp.getItemNum();
-            String quantity = tmp.getQuantityString();
-            String address = tmp.getAddress();
-
-            field_date.setText(date);
-            field_time.setText(time);
-            field_orderNum.setText(orderNUm);
-            field_itemNum.setText(itemNum);
-            field_quantity.setText(quantity);
-            area_address.setText(address);
-
-            allValid=true;
-
-            label_date.setForeground(Color.BLACK);
-            label_time.setForeground(Color.BLACK);
-            label_orderNum.setForeground(Color.BLACK);
-            label_itemNum.setForeground(Color.BLACK);
-            label_quantity.setForeground(Color.BLACK);
-
-            return true;
-        }
-        System.err.println("Order Queue is empty.");
-        return false;
-    }
-
-    private void makeQueue(){
-        Date date;
-        Date time;
-        String orderNum;
-        String itemNum;
-        Number quantity;
-        String address;
-        try{
-            while (true) {
-                String tmp = data.readString();
-                if(data.isEOF()) break;
-                date = Order.makeDate(tmp);
-                time = Order.makeTime(data.readString());
-                orderNum = Order.makeString(data.readString());
-                itemNum = Order.makeString(data.readString());
-                quantity = Order.makeInteger(data.readString());
-                address = readAddress();
-                orderQueue.add(new Order(date,time,orderNum,itemNum,quantity,address));
-            }
-        }catch(ParseException e){            //when Format is invalid
-            System.err.println(e.getMessage());
-        }catch(IllegalStateException e2){    //when queue is full
-            System.err.println("IllegalStateException: Queue is full");
-            throw e2;
-        }
-    }
-    private String readAddress(){
-        String result="";
-        while(true){
-            Character c = data.readC();
-            if((int)c==10) break;
-            if((int)c==92){
-                Character next = data.readC();
-                if((int)next==110) c=(char)10;
-            }
-            result += c;
-        }
-        return result;
-    }
-
-    private void buildForm(){
         initPanels();
 
-        addComponentsToChecked();
-        addComponentsToUnchecked();
-        addComponentsToButton();
+        addComponentsToCheckedPanel();
+        addComponentsToUncheckedPanel();
+        addComponentsToButtonsPanel();
 
         add("North", panel_checked);
         add("Center", panel_unchecked);
@@ -158,6 +48,8 @@ public class AcmeDistributingV2 extends JFrame{
         pack();
         setPreferredSize(new Dimension(760,getHeight()));   //height: auto, width: 860
         pack();
+        setVisible(true);
+
     }
 
     private void initPanels(){
@@ -170,14 +62,19 @@ public class AcmeDistributingV2 extends JFrame{
         panel_buttons.setLayout(new FlowLayout());
     }
 
-    private void addComponentsToChecked(){
-
+    private void addComponentsToCheckedPanel(){
 
         label_date = new JLabel("Date");
         label_time = new JLabel("Time");
         label_orderNum = new JLabel("Order #");
         label_itemNum = new JLabel("Item #");
         label_quantity = new JLabel("Quantity");
+
+        label_date.setForeground(Color.RED);
+        label_time.setForeground(Color.RED);
+        label_orderNum.setForeground(Color.RED);
+        label_itemNum.setForeground(Color.RED);
+        label_quantity.setForeground(Color.RED);
 
         field_date = new JTextField();
         field_time = new JTextField();
@@ -198,7 +95,7 @@ public class AcmeDistributingV2 extends JFrame{
 
     }
 
-    private void addComponentsToUnchecked(){
+    private void addComponentsToUncheckedPanel(){
         label_address = new JLabel("Address");
         area_address = new JTextArea(5,50);
 
@@ -206,11 +103,12 @@ public class AcmeDistributingV2 extends JFrame{
         panel_unchecked.add(area_address);
     }
 
-    private void addComponentsToButton(){
+    private void addComponentsToButtonsPanel(){
 
         button_ok = new JButton("OK");
         button_quit = new JButton("Quit");
 
+        button_ok.setEnabled(false);
         panel_buttons.add(button_ok);
         panel_buttons.add(button_quit);
     }
@@ -226,22 +124,66 @@ public class AcmeDistributingV2 extends JFrame{
         button_quit.addActionListener(new QuitButtonListener());
     }
 
-    class QuitButtonListener implements ActionListener{
+    private void addDataToQueue(){
+        String date = field_date.getText();
+        String time = field_time.getText();
+        String orderNum = field_orderNum.getText();
+        String itemNum = field_itemNum.getText();
+        String quantity = field_quantity.getText();
+        String address = area_address.getText();
+        Order tmp;
+        try{
+            tmp = new Order(Order.makeDate(date),Order.makeTime(time),
+                    Order.makeString(orderNum),Order.makeString(itemNum),
+                    Order.makeInteger(quantity),address);
+        }catch(ParseException e){
+            System.err.println(e.getMessage());
+            return;
+        }
+        orderQueue.offer(tmp);
+    }
 
-        private ASCIIOutputFile output;
+    class OkButtonListener implements ActionListener{
+
         @Override
         public void actionPerformed(ActionEvent e) {
             addDataToQueue();
+            field_date.setText("");
+            field_time.setText("");
+            field_orderNum.setText("");
+            field_itemNum.setText("");
+            field_quantity.setText("");
+            area_address.setText("");
+
+            label_date.setForeground(Color.RED);
+            label_time.setForeground(Color.RED);
+            label_orderNum.setForeground(Color.RED);
+            label_itemNum.setForeground(Color.RED);
+            label_quantity.setForeground(Color.RED);
+
+            button_ok.setEnabled(false);
+        }
+
+    }
+
+    class QuitButtonListener implements ActionListener{
+        private ASCIIOutputFile output;
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
             while (true){
                 try{
                     output = new ASCIIOutputFile();
                     break;
                 }catch(NullPointerException e1){
-                    int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to close without saving?","Close without saving",JOptionPane.YES_NO_OPTION);
-                    if(confirm!=1) System.exit(-1);
+                    int confirm = JOptionPane.showConfirmDialog(null,
+                            "Are you sure want to close without saving?",
+                            "Close without saving",JOptionPane.YES_NO_CANCEL_OPTION);
+
+                    if(confirm==0) System.exit(-1);
+                    if(confirm==2) return;
                 }
             }
-
 
             while(!orderQueue.isEmpty()){
                 Order order = orderQueue.poll();
@@ -260,15 +202,9 @@ public class AcmeDistributingV2 extends JFrame{
 
     }
 
-    class OkButtonListener implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            addDataToQueue();
-            showDataFromQueue();
-        }
 
-    }
-    private boolean dateValid=true,timeValid=true,orderNumValid=true,itemNumValid=true,quantityValid = true;
+    private boolean dateValid=false,timeValid=false,
+            orderNumValid=false,itemNumValid=false,quantityValid = false;
     class checkedFieldListener implements FocusListener{
 
 
@@ -307,7 +243,7 @@ public class AcmeDistributingV2 extends JFrame{
                     quantityValid = true;
                     label_quantity.setForeground(Color.BLACK);
                 }
-            }else if(focused == field_orderNum||focused == field_itemNum){
+            }else if(focused == field_orderNum || focused == field_itemNum){
                 if(!Order.checkStringValid(text)){
                     allValid=false;
                     if(focused == field_orderNum){
@@ -330,7 +266,8 @@ public class AcmeDistributingV2 extends JFrame{
                 System.err.println("Unknown JTextField");
                 return;
             }
-            allValid = dateValid && timeValid && orderNumValid && itemNumValid && quantityValid;
+            allValid = dateValid && timeValid
+                    && orderNumValid && itemNumValid && quantityValid;
             if(!allValid) button_ok.setEnabled(false);
             else button_ok.setEnabled(true);
         }
